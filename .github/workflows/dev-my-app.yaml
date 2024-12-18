@@ -13,7 +13,7 @@ env:
   PHASE: dev
   APP_NAME: my-app
   AWS_REGION: ap-northeast-2
-  AWS_ROLE_TO_ASSUME: arn:aws:iam::183295419955:oidc-provider/token.actions.githubusercontent.com
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::183295419955:role/ecr-github-actions
 
 # github action oidc
 permissions:
