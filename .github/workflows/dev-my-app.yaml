@@ -30,6 +30,7 @@ jobs:
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: samplerolesession
 
       - name: 4. Login to Amazon ECR Public
         id: login-ecr-public
