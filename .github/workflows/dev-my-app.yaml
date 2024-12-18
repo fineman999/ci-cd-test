@@ -1,0 +1,58 @@
+name: dev my app
+
+on:
+  push:
+    branches:
+      - develop
+
+concurrency:
+  group: dev-my-app
+  cancel-in-progress: true
+
+env:
+  PHASE: dev
+  APP_NAME: my-app
+  ALERT_TARGET: ${{ secrets.SLACK_GROUP_BACKEND }}
+  SLACK_WEBHOOK_LOGGING: ${{ secrets.SLACK_LOGGING_DEV }}
+
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: 1. Start Action Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: workflow,message
+          custom_payload: |
+            {
+              attachments: [{
+                color: '439FE0',
+                text: `[${process.env.AS_WORKFLOW}]\n 배포 시작 - ${process.env.AS_MESSAGE}`,
+              }]
+            }
+      - name: 2. Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 3. Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Build, tag, and push docker image to Amazon ECR Public
+        env:
+          REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+          REPOSITORY: ${{ secrets.AWS_ECR_PUBLIC_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f Dockerfile.dev -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+      
