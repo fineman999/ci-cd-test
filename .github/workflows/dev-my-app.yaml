@@ -13,6 +13,10 @@ env:
   PHASE: dev
   APP_NAME: my-app
 
+# github action oidc
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build:
