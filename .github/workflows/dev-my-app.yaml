@@ -12,6 +12,8 @@ concurrency:
 env:
   PHASE: dev
   APP_NAME: my-app
+  AWS_REGION: ap-northeast-2
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::183295419955:oidc-provider/token.actions.githubusercontent.com
 
 # github action oidc
 permissions:
@@ -31,8 +33,8 @@ jobs:
       - name: 3. Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ secrets.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-session-name: samplerolesession
 
       - name: 4. Login to Amazon ECR Public
