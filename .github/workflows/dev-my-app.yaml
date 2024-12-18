@@ -12,26 +12,12 @@ concurrency:
 env:
   PHASE: dev
   APP_NAME: my-app
-  ALERT_TARGET: ${{ secrets.SLACK_GROUP_BACKEND }}
-  SLACK_WEBHOOK_LOGGING: ${{ secrets.SLACK_LOGGING_DEV }}
 
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: 1. Start Action Slack
-        uses: 8398a7/action-slack@v3
-        with:
-          status: custom
-          fields: workflow,message
-          custom_payload: |
-            {
-              attachments: [{
-                color: '439FE0',
-                text: `[${process.env.AS_WORKFLOW}]\n 배포 시작 - ${process.env.AS_MESSAGE}`,
-              }]
-            }
       - name: 2. Checkout Code
         uses: actions/checkout@v4
 
