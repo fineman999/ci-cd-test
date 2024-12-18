@@ -12,8 +12,6 @@ concurrency:
 env:
   PHASE: dev
   APP_NAME: my-app
-  AWS_REGION: ap-northeast-2
-  AWS_ROLE_TO_ASSUME: arn:aws:iam::183295419955:role/ecr-github-actions
 
 # github action oidc
 permissions:
@@ -24,29 +22,25 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: Debug OIDC Token
-        run: |
-          echo "OIDC Token: ${{ secrets.GITHUB_TOKEN }}"
       - name: 2. Checkout Code
         uses: actions/checkout@v4
 
       - name: 3. Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-session-name: samplerolesession
 
       - name: 4. Login to Amazon ECR Public
-        id: login-ecr-public
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
+
 
       - name: 5. Build, tag, and push docker image to Amazon ECR Public
         env:
-          REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
-          REPOSITORY: ${{ secrets.AWS_ECR_PUBLIC_REPOSITORY }}
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.AWS_ECR_PRIVATE_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -f Dockerfile.dev -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
