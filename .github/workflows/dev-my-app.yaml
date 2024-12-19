@@ -88,3 +88,19 @@ jobs:
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name ${{env.AWS_CODE_DEPLOY_GROUP}} \
           --s3-location bucket=$AWS_S3_BUCKET_NAME,bundleType=zip,key=codedeploy/$GITHUB_SHA.zip
+
+      - name: 9. Finish GitHub Action
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: workflow,took,message
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: `[${process.env.AS_WORKFLOW}]\n 커밋: ${process.env.AS_MESSAGE}\n 상태: ${{ job.status }}\n 소요시간: ${process.env.AS_TOOK}`,
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
