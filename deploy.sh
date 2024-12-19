@@ -1,8 +1,8 @@
 #!/bin/bash
 IMAGE_FILE_PATH="/home/ec2-user/app/image.txt"
-ERC_URL_PATH="/home/ec2-user/app/erc_url.txt"
+ERC_URL_PATH="/home/ec2-user/app/erc-url.txt"
 IMAGE_NAME=$(cat "$IMAGE_FILE_PATH") #image.txt에 저장한 도커이미지 정보
-ERC_URL=$(cat "$ERC_URL_PATH") #erc_url.txt에 저장한 도커이미지 정보
+ERC_URL=$(cat "$ERC_URL_PATH") #erc-url.txt에 저장한 도커이미지 정보
 
 CURRENT_PID=$(docker container ls -q)
 
