@@ -14,7 +14,7 @@ env:
   APP_NAME: my-app
   AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
   AWS_CODE_DEPLOY_NAME: ${{ secrets.AWS_CODE_DEPLOY_NAME }}
-  AWS_CODE_DEPLOY_GROUP: ${{ secrets.AWS_CODE_DEPLOY_GROUP }}
+  AWS_CODE_DEPLOY_GROUP: ${{ secrets.AWS_CODE_DEPLOY_GROUP_NAME }}
 
 
 # github action oidc
@@ -41,7 +41,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
 
-      - name: 5. Build, tag, and push docker image to Amazon ECR Public
+      - name: 5. Build, tag, and push docker image to Amazon ECR Private
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ secrets.AWS_ECR_PRIVATE_REPOSITORY }}
