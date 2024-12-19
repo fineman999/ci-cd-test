@@ -54,6 +54,7 @@ jobs:
       - name: 6. Create a ZIP file for the AWS CodeDeploy
         run: |
           mkdir ${{env.AWS_CODE_DEPLOY_NAME}} && cp -r appspec.yml image.txt ${{ env.AWS_CODE_DEPLOY_NAME }}
+          mkdir ${{env.AWS_CODE_DEPLOY_NAME}}/scripts && cp -r deploy.sh ${{ env.AWS_CODE_DEPLOY_NAME }}/scripts
 
       - name: 7. Upload the ZIP file to the S3 bucket(CodeDeploy uses this file)
         run: |
