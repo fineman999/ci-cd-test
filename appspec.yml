@@ -12,6 +12,6 @@ permissions:
     group: root # 그룹
 hooks:
   ApplicationStart:
-    - location: deploy.sh # 실행할 스크립트 파일 위치
+    - location: ./deploy.sh # 실행할 스크립트 파일 위치
       timeout: 120 # 타임아웃 시간
       runas: root # 실행 사용자
