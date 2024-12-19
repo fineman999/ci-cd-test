@@ -3,7 +3,7 @@ IMAGE_FILE_PATH="/home/ec2-user/app/image.txt"
 ECR_URL_PATH="/home/ec2-user/app/ecr-url.txt"
 IMAGE_NAME=$(cat "$IMAGE_FILE_PATH") #image.txt에 저장한 도커이미지 정보
 ECR_URL=$(cat "$ECR_URL_PATH") #ecr-url.txt에 저장한 ECR URL 정보
-CONTAINER_NAME="dev-app"
+CONTAINER_NAME="dev-container"
 
 # 현재 실행 중인 컨테이너 ID들 중 해당 컨테이너 이름으로 된 것이 있는지 확인
 CURRENT_PID=$(sudo docker ps -a --filter "name=$CONTAINER_NAME" -q)
@@ -33,5 +33,5 @@ echo "> docker pull $IMAGE_NAME"
 docker pull $IMAGE_NAME
 
 echo "> docker run $IMAGE_NAME"
-docker run -d -p 3001:3000 --name dev-container -e NODE_ENV=dev --restart always $IMAGE_NAME --name $CONTAINER_NAME
+docker run -d -p 3001:3000 -e NODE_ENV=dev --restart always $IMAGE_NAME --name $CONTAINER_NAME
 
