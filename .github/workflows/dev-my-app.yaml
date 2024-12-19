@@ -36,7 +36,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-session-name: samplerolesession
 
-      - name: 4. Login to Amazon ECR Public
+      - name: 4. Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
@@ -48,12 +48,13 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           echo "${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}" > image.txt
+          echo "${{ env.REGISTRY }}/${{ env.REPOSITORY }}" > ecr-url.txt
           docker build -f Dockerfile.dev -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: 6. Create a ZIP file for the AWS CodeDeploy
         run: |
-          mkdir ${{env.AWS_CODE_DEPLOY_NAME}} && cp -r appspec.yml image.txt ${{ env.AWS_CODE_DEPLOY_NAME }}
+          mkdir ${{env.AWS_CODE_DEPLOY_NAME}} && cp -r appspec.yml image.txt ecr-url.txt ${{ env.AWS_CODE_DEPLOY_NAME }}
           mkdir ${{env.AWS_CODE_DEPLOY_NAME}}/scripts && cp -r deploy.sh ${{ env.AWS_CODE_DEPLOY_NAME }}/scripts
 
       - name: 7. Upload the ZIP file to the S3 bucket(CodeDeploy uses this file)
