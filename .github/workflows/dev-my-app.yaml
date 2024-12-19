@@ -38,39 +38,65 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: 5. Build Docker image
+      - name: 5. Build, tag, and push Docker image to Amazon ECR Private
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ secrets.AWS_ECR_PRIVATE_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -f Dockerfile.dev -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           echo "${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}" > image.txt
           echo "${{ env.REGISTRY }}/${{ env.REPOSITORY }}" > ecr-url.txt
+          docker build -f Dockerfile.dev -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-  push_and_deploy:
+      - name: 6. Run Tests
+        run: |
+          # 예시: 테스트 스크립트 실행
+          # 테스트가 실패하면 job이 종료되므로, 배포가 진행되지 않습니다.
+          docker run $REGISTRY/$REPOSITORY:$IMAGE_TAG npm test
+
+      - name: 7. Upload the Image and ECR URL as Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            image.txt
+            ecr-url.txt
+
+  deploy:
     runs-on: ubuntu-22.04
-    needs: build  # push와 deploy는 build가 끝난 후 실행됩니다
+    needs: build  # `deploy`는 `build`가 성공적으로 완료된 후 실행됩니다.
     steps:
-      - name: 2. Configure AWS Credentials
+      - name: 2. Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 3. Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      - name: 4. Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-session-name: samplerolesession
 
-      - name: 3. Push Docker image to ECR
-        run: |
-          REGISTRY=$(cat ecr-url.txt)
-          IMAGE_TAG=$(cat image.txt)
-          docker push $REGISTRY:$IMAGE_TAG
+      - name: 5. Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: 4. Create a ZIP file for AWS CodeDeploy
+      - name: 6. Push Docker image to ECR
+        run: |
+          IMAGE=$(cat image.txt)
+          docker push $IMAGE
+
+      - name: 7. Create a ZIP file for AWS CodeDeploy
         run: |
           mkdir ${{env.AWS_CODE_DEPLOY_NAME}} && cp -r appspec.yml image.txt ecr-url.txt ${{ env.AWS_CODE_DEPLOY_NAME }}
           mkdir ${{env.AWS_CODE_DEPLOY_NAME}}/scripts && cp -r deploy.sh ${{ env.AWS_CODE_DEPLOY_NAME }}/scripts
 
-      - name: 5. Upload ZIP file to S3 (for CodeDeploy)
+      - name: 8. Upload the ZIP file to the S3 bucket (CodeDeploy uses this file)
         run: |
           aws deploy push \
           --application-name ${{env.AWS_CODE_DEPLOY_NAME}} \
@@ -78,7 +104,7 @@ jobs:
           --ignore-hidden-files \
           --source ${{env.AWS_CODE_DEPLOY_NAME}}
 
-      - name: 6. Deploy to EC2 using AWS CodeDeploy
+      - name: 9. AWS EC2 CodeDeploy
         run: |
           echo "Deploying the application"
           aws deploy create-deployment --application-name ${{env.AWS_CODE_DEPLOY_NAME}} \
