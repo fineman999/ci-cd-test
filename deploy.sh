@@ -33,5 +33,5 @@ echo "> docker pull $IMAGE_NAME"
 docker pull $IMAGE_NAME
 
 echo "> docker run $IMAGE_NAME"
-docker run -d -p 3001:3000 -e NODE_ENV=dev --restart always $IMAGE_NAME --name $CONTAINER_NAME
+docker run -d -p 3001:3000 --name $CONTAINER_NAME -e NODE_ENV=dev --restart always $IMAGE_NAME
 
