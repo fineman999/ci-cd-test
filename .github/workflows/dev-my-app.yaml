@@ -68,6 +68,6 @@ jobs:
         run: |
           echo "Deploying the application"
           aws deploy create-deployment --application-name ${{env.AWS_CODE_DEPLOY_NAME}} \
-          --deployment-config-name CodeDeployDefault.OneAtTime \
+          --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name ${{env.AWS_CODE_DEPLOY_GROUP}} \
           --s3-location bucket=$AWS_S3_BUCKET_NAME,bundleType=zip,key=codedeploy/$GITHUB_SHA.zip
