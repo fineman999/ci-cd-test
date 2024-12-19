@@ -3,9 +3,10 @@ IMAGE_FILE_PATH="/home/ec2-user/app/image.txt"
 ECR_URL_PATH="/home/ec2-user/app/ecr-url.txt"
 IMAGE_NAME=$(cat "$IMAGE_FILE_PATH") #image.txt에 저장한 도커이미지 정보
 ECR_URL=$(cat "$ECR_URL_PATH") #ecr-url.txt에 저장한 ECR URL 정보
+CONTAINER_NAME="dev-app"
 
-# 현재 실행 중인 컨테이너 ID들 중 해당 이미지로 구동된 컨테이너 찾기
-CURRENT_PID=$(docker ps -q --filter "ancestor=$IMAGE_NAME")
+# 현재 실행 중인 컨테이너 ID들 중 해당 컨테이너 이름으로 된 것이 있는지 확인
+CURRENT_PID=$(sudo docker ps -a --filter "name=$CONTAINER_NAME" -q)
 
 if [ -z "$CURRENT_PID" ]; then
   echo "> 현재 $IMAGE_NAME 이미지로 구동 중인 Docker Container가 없습니다"
@@ -32,5 +33,5 @@ echo "> docker pull $IMAGE_NAME"
 docker pull $IMAGE_NAME
 
 echo "> docker run $IMAGE_NAME"
-docker run -d -p 3001:3000 --name dev-container -e NODE_ENV=dev --restart always $IMAGE_NAME
+docker run -d -p 3001:3000 --name dev-container -e NODE_ENV=dev --restart always $IMAGE_NAME --name $CONTAINER_NAME
 
