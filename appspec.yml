@@ -1,0 +1,17 @@
+version: 0.0
+os: linux
+files:
+  - source: / # 애플리케이션 파일 위치
+    destination: /home/ec2-user/app/ # 대상 EC2 인스턴스의 애플리케이션 파일 위치
+    overwrite: yes # 이미 존재하는 파일 덮어쓰기
+
+permissions:
+  - object: /home/ec2-user/app/ # 권한을 설정할 대상
+    pattern: "**" # 모든 파일 및 디렉터리
+    owner: root # 소유자
+    group: root # 그룹
+hooks:
+  ApplicationStart:
+    - location: scripts/deploy.sh # 실행할 스크립트 파일 위치
+      timeout: 120 # 타임아웃 시간
+      runas: root # 실행 사용자
